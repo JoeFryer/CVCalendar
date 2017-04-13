@@ -291,28 +291,27 @@ extension CVCalendarWeekContentViewController {
     }
 
     public func getPreviousWeek(_ presentedWeekView: WeekView) -> WeekView {
-        if let presentedMonthView = monthViews[presented],
-            let previousMonthView = monthViews[previous] ,
-            presentedWeekView.monthView == presentedMonthView {
-                for weekView in presentedMonthView.weekViews {
-                    if weekView.index == presentedWeekView.index - 1 {
-                        return weekView
-                    }
+        if let presentedMonthView = monthViews[presented], let previousMonthView = monthViews[previous], presentedWeekView.monthView == presentedMonthView {
+            for weekView in presentedMonthView.weekViews {
+                if weekView.index == presentedWeekView.index - 1 {
+                    return weekView
                 }
-
-                for weekView in previousMonthView.weekViews {
-                    if weekView.index == previousMonthView.weekViews.count - 1 {
-                        return weekView
-                    }
+            }
+            
+            let completeWeek = presentedWeekView.dayViews.first?.date.day == 1
+            for weekView in previousMonthView.weekViews {
+                if weekView.index == previousMonthView.weekViews.count - (completeWeek ? 1 : 2) {
+                    return weekView
                 }
+            }
         } else if let previousMonthView = monthViews[previous] {
             monthViews[following] = monthViews[presented]
             monthViews[presented] = monthViews[previous]
             monthViews[previous] = getPreviousMonth(previousMonthView.date)
-
+            
             presentedMonthView = monthViews[previous]!
         }
-
+        
         return getPreviousWeek(presentedWeekView)
     }
 
@@ -327,7 +326,9 @@ extension CVCalendarWeekContentViewController {
                 }
 
                 for weekView in followingMonthView.weekViews {
-                    if weekView.index == 0 {
+                    if weekView.index == 0 && weekView.dayViews.first?.date.month != presentedWeekView.dayViews.first?.date.month {
+                        return weekView
+                    } else if weekView.index == 1 {
                         return weekView
                     }
                 }
